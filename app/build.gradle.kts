@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace = "com.ceydagb.earlynotify"
-    compileSdk = 34
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.ceydagb.earlynotify"
