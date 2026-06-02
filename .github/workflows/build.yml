@@ -29,7 +29,14 @@ jobs:
         run: chmod +x ./gradlew
 
       - name: Run unit tests
-        run: ./gradlew testDebugUnitTest
+        run: ./gradlew testDebugUnitTest --stacktrace 2>&1 | tee gradle-test.log; exit ${PIPESTATUS[0]}
+
+      - name: Upload test log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gradle-test-log
+          path: gradle-test.log
 
       - name: Build debug APK
         run: ./gradlew assembleDebug
