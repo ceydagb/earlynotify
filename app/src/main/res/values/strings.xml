@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">EarlyNotify</string>
+    <string name="accessibility_service_label">EarlyNotify — Huawei Health nabız okuyucu</string>
+    <string name="accessibility_service_description">Huawei Health ekranında görünen anlık nabız değerini okuyup eşik aşıldığında alarm üretir. Veriler yalnızca cihazınızda işlenir, hiçbir yere gönderilmez.</string>
+</resources>
