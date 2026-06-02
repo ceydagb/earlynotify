@@ -11,7 +11,10 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.ceydagb.earlynotify.alarm.AlarmNotifier
+import com.ceydagb.earlynotify.data.AccessibilitySnapshot
 import com.ceydagb.earlynotify.data.AppSettings
+import com.ceydagb.earlynotify.data.DiagnosticsBus
+import com.ceydagb.earlynotify.data.HealthConnectSnapshot
 import com.ceydagb.earlynotify.data.HealthConnectSource
 import com.ceydagb.earlynotify.data.HuaweiHealthAccessibilityService
 import com.ceydagb.earlynotify.data.SettingsRepository
@@ -57,6 +60,18 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     val healthConnectPermissions: Set<String> = HealthConnectSource.PERMISSIONS
+
+    // Tanılama akışları
+    val accessibilityDiag: StateFlow<AccessibilitySnapshot?> = DiagnosticsBus.accessibility
+    val healthConnectDiag: StateFlow<HealthConnectSnapshot?> = DiagnosticsBus.healthConnect
+
+    /** Health Connect'ten son 30 dakikayı okuyup tanılama özetini yayınlar. */
+    fun runHealthConnectDiagnostic() {
+        viewModelScope.launch {
+            val snapshot = healthConnect.readDiagnostic(30 * 60 * 1000L)
+            DiagnosticsBus.publishHealthConnect(snapshot)
+        }
+    }
 
     fun refreshPermissions() {
         val ctx = getApplication<Application>()

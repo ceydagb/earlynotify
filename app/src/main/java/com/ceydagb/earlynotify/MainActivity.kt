@@ -57,6 +57,8 @@ private fun AppContent(viewModel: MainViewModel) {
     val activity = androidx.compose.ui.platform.LocalContext.current as ComponentActivity
     val settings by viewModel.settings.collectAsState()
     val permissions by viewModel.permissions.collectAsState()
+    val accessibilityDiag by viewModel.accessibilityDiag.collectAsState()
+    val healthConnectDiag by viewModel.healthConnectDiag.collectAsState()
 
     // Health Connect izin akışı
     val healthLauncher = rememberLauncherForActivityResult(
@@ -129,6 +131,12 @@ private fun AppContent(viewModel: MainViewModel) {
             settings = settings,
             onChange = { transform -> viewModel.update(transform) },
             onTestAlarm = { viewModel.fireTestAlarm() }
+        )
+
+        com.ceydagb.earlynotify.ui.DiagnosticsSection(
+            accessibility = accessibilityDiag,
+            healthConnect = healthConnectDiag,
+            onTestHealthConnect = { viewModel.runHealthConnectDiagnostic() }
         )
 
         Text(

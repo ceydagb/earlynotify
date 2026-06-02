@@ -36,6 +36,46 @@ class HealthConnectSource(private val context: Context) {
      * [sinceMs]'den sonraki nabız ölçümlerini zamana göre artan sırada döndürür.
      * Health Connect erişilemezse boş liste döner (çağıran tarafın çökmemesi için).
      */
+    /**
+     * Tanılama: son [windowMs] içindeki nabız kayıtlarını okuyup özet (durum, sayı, en yeni
+     * değer, hata) döndürür. UI'da "Health Connect'te veri var mı?" sorusunu yanıtlamak için.
+     */
+    suspend fun readDiagnostic(windowMs: Long): HealthConnectSnapshot {
+        val now = System.currentTimeMillis()
+        val available = isAvailable()
+        if (!available) {
+            return HealthConnectSnapshot(
+                timestampMs = now, available = false, availabilityCode = availability(),
+                granted = false, recordCount = 0, latestBpm = null, latestAtMs = null,
+                error = "Health Connect kullanılamıyor (kod ${availability()})"
+            )
+        }
+        return try {
+            val granted = hasPermissions()
+            if (!granted) {
+                HealthConnectSnapshot(
+                    timestampMs = now, available = true, availabilityCode = availability(),
+                    granted = false, recordCount = 0, latestBpm = null, latestAtMs = null,
+                    error = "Nabız okuma izni verilmemiş"
+                )
+            } else {
+                val samples = readSince(now - windowMs)
+                val latest = samples.lastOrNull()
+                HealthConnectSnapshot(
+                    timestampMs = now, available = true, availabilityCode = availability(),
+                    granted = true, recordCount = samples.size,
+                    latestBpm = latest?.bpm, latestAtMs = latest?.timestampMs, error = null
+                )
+            }
+        } catch (e: Exception) {
+            HealthConnectSnapshot(
+                timestampMs = now, available = true, availabilityCode = availability(),
+                granted = false, recordCount = 0, latestBpm = null, latestAtMs = null,
+                error = e.message ?: e.javaClass.simpleName
+            )
+        }
+    }
+
     suspend fun readSince(sinceMs: Long): List<HeartRateSample> {
         if (!isAvailable()) return emptyList()
         return try {

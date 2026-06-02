@@ -109,7 +109,7 @@ class MonitorService : Service() {
 
         // Kaynak A — Health Connect (periyodik okuma)
         scope.launch {
-            var lastReadMs = System.currentTimeMillis() - 60_000L
+            var lastReadMs = System.currentTimeMillis() - 2 * 60_000L
             while (true) {
                 if (settings.sourceMode != DataSourceMode.ACCESSIBILITY && healthConnect.isAvailable()) {
                     val granted = runCatching { healthConnect.hasPermissions() }.getOrDefault(false)
